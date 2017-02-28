@@ -8,30 +8,49 @@ var connection = mysql.createConnection({
   password : '',
   database : 'fabrication'
 });
-
+connection.connect();
 // Create new serialport pointer
 var serial = new serialPort("COM4" , { baudrate : 9600 });
 
 // Add data read event listener
+var str = '';
 serial.on( "data", function( chunk ) {
     
-    console.log(chunk);
-    var res = chunk.split(" ");
-    var post = {
-    	cell_id: res[0],
-    	val: res[1],
-    };
+    str += chunk;
     
-    connection.connect();
-	connection.query("INSERT INTO status ('cell_id','val') VALUES ?",res, function(err, rows, fields) 
-	{
-	  if(err)
-	  	console.log('Failed to insert');
-	  else
-	  	console.log('success');
-	});
+    try {
 
-	connection.end();
+        res = JSON.parse(str);
+
+	    console.log("cell_id: "+res['cell_id']+" && val:"+res['val'])
+		str = '';
+
+		var post = {
+			cell_id: res['cell_id'],
+			val: 	 res['val'], 
+		};
+
+		
+	    connection.query("DELETE FROM status WHERE cell_id = ? ",res['cell_id'], function(err, rows, fields) 
+		{
+		  if(err)
+		  	console.log('Failed to delete');
+		  else
+		  	console.log('success');
+		});
+		connection.query("INSERT INTO status SET ?",post, function(err, rows, fields) 
+		{
+		  if(err)
+		  	console.log('Failed to insert');
+		  else
+		  	console.log('success');
+		});
+
+		
+    } catch (e) {
+        //console.log(str);
+        return;
+    }
 
 });
 

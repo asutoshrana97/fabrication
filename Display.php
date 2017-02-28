@@ -19,6 +19,8 @@
 			</tr>
 		<?php } ?>
 	</table>
+	
+	<button onclick = "reset()">Reset</button>
 
 	<br><br><br>
 	<table border=0 cellpadding=5>
@@ -68,7 +70,7 @@
 			},
 			complete: function() {
 			  // Schedule the next request when the current one's complete
-			  setTimeout(worker, 5000);
+			  setTimeout(worker, 500);
 			}
 		});
 
@@ -76,7 +78,23 @@
 	}
 	worker();
 
-	
+	function reset(){
+		<?php
+			for($i=0 ; $i<$row ; $i++){ 
+				for( $j=0 ; $j<$col ; $j++){ ?>
+					document.getElementById("cell<?php echo $i.$j; ?>").style.backgroundColor = "white";
+		<?php   } 
+			} ?>
+		$.ajax({
+			type: 'POST',
+			url: 'reset.php', 
+			
+			success: function(res) {
+			
+			}
+			
+		});
+	}
 
 </script>
 </body>
