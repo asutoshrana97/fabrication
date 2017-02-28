@@ -2,33 +2,10 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	<title>WareHouse empty space detector</title>
+	<script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+	<script type='text/javascript' src='js/jquery.min.js'></script>
 </head>
 <body>
-<script type="text/javascript">
-	
-	window.onload = function setDataSource() {
-		if (!!window.EventSource) {
-			var source = new EventSource("sse.php");
-
-			source.addEventListener("message", function(e) {
-				//alert(e.data);
-				$res = JSON.parse(e.data);
-				var cell_id = document.getElementById($res['cell_id']);
-				//alert($res['val']);	
-				if($res['val']==0)
-					cell_id.style.backgroundColor="red";
-				else if($res['val']==1)
-					cell_id.style.backgroundColor="green";
-				else
-					cell_id.style.backgroundColor="yellow";
-			}, false);
-			
-			
-		} else {
-			document.getElementById("notSupported").style.display = "block";
-		}
-	}
-</script>
 <center>
 	<h1>Warehouse Empty Space Detector and Cleaner</h1>
 	<?php $row = 10; $col = 10; ?>
@@ -59,6 +36,48 @@
 		</tr>
 	</table>
 </center>
+<script type="text/javascript">
 
+	function worker() {
+
+		$.ajax({
+			type: 'POST',
+			url: 'get_status.php', 
+			dataType: 'json', 
+			success: function(res) {
+				
+				
+				var cell_id;
+				<?php
+					for($i=0 ; $i<$row ; $i++){ 
+						for( $j=0 ; $j<$col ; $j++){ ?>
+							
+							cell_id = document.getElementById("cell<?php echo $i.$j; ?>");
+							if(res["cell<?php echo $i.$j; ?>"]==0)
+								cell_id.style.backgroundColor="red";
+							else if(res["cell<?php echo $i.$j; ?>"]==1)
+								cell_id.style.backgroundColor="green";
+							else if(res["cell<?php echo $i.$j; ?>"]==2)
+								cell_id.style.backgroundColor="yellow";
+							else
+								cell_id.style.backgroundColor="white";
+
+				<?php   } 
+					} ?>
+			
+			},
+			complete: function() {
+			  // Schedule the next request when the current one's complete
+			  setTimeout(worker, 5000);
+			}
+		});
+
+		
+	}
+	worker();
+
+	
+
+</script>
 </body>
 </html> 
